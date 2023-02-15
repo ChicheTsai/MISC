@@ -9,29 +9,9 @@ import openpyxl
 from openpyxl.styles import Font
 from openpyxl.styles import Border,Side
 import csv
-#
-#import openpyxl
 #from openpyxl.chart import LineChart, Reference
 ##import matplotlib.pyplot as plt
 #from math import ceil
-#import wave
-#
-##DEFINITIONS
-#COL_INDEX_TIME = 1
-#COL_INDEX_DATA_24bit_HEX_L = 2  
-#COL_INDEX_DATA_24bit_HEX_R = 3  
-#COL_INDEX_DATA_24bit_DEC_L = 4  
-#COL_INDEX_DATA_24bit_DEC_R = 5 
-##COL_INDEX_DATA_16bit_HEX_L = 5   
-##COL_INDEX_DATA_16bit_HEX_R = 6  
-#COL_INDEX_DATA_16bit_DEC_L = 6  
-#COL_INDEX_DATA_16bit_DEC_R = 7
-#
-#COL_INDEX_SAMPLING_RATE = 9
-#COL_INDEX_WAVEFORM = COL_INDEX_SAMPLING_RATE
-#
-#MAX_PERIOD_IN_ms = 300
-#
 ##===========================#    
 #def fill_data_into_excel(r, c, data,sheet):
 #    sheet.cell(r, c).value = data
@@ -77,11 +57,6 @@ import csv
 #        val_24 = (val_24 & CONST_SIGN_VAL_MAX) - CONST_SIGN_VAL_MAX - 1 
 #    return val_24
 #    
-#def is_right_channel(string):
-#    if( string.find("1") != -1 ):
-#        return 1;
-#    else:
-#        return 0;
 #
 #def raw_convert_bytearr(rawList):
 #    retList = []
@@ -100,22 +75,6 @@ import csv
 #        retList.append( (rawList2[i] >> 8) & 0xFF )        
 #    #print(retList)
 #    return bytearray(retList)
-#
-#def Check_Procssing_Rate(ratio, flag):
-#    for i in range(0,10,1):
-#        #if(ratio *100 >= (i+1)*10):
-#        #    print(ratio*100)
-#        if(ratio *100 >= 10*(i+1)  and flag & (0x01<<i)):
-#            print(str((i+1)*10) + "% Procssing...")
-#            flag = flag<<1
-#            print(flag)
-#        elif(ratio *100 >= 30):
-#            print(ratio *100 >= 10*(i+1) , flag & (0x01<<i) )
-#        #else:
-#        #    print(ratio *100 >= 10*(i+1) , flag & (0x01<<i) )
-#        #else:
-#        #    print(flag & (0x01<<i))
-#    return flag;        
 #
 #def data_plot(ws, dataLen):
 #    chart = LineChart()
@@ -174,17 +133,6 @@ import csv
 #    s.smooth = True
 #    s.graphicalProperties.line.width = 10    
 #
-def logInit(totalSize, subSize):
-    num = math.ceil(totalSize / subSize);
-    logs = []
-    for i in range(0,num):
-        subLog = 'log_' + str(i) + '.log'
-        subF = open(subLog, 'wb')
-        logs.append([subLog,subF])
-    return  logs
-def logClose(logs):
-    for i in range(0,len(logs)):
-        logs[i][1].close()
 
 def csv_to_excel(csv_filename, excel_filename):
 
@@ -255,11 +203,11 @@ def AppStart():
     harmonyReport = inConfigList[1].split()[1]
     ebqReport = inConfigList[2].split()[1]
     
-    sheetInfo = [[inConfigList[3].split()[0], int(inConfigList[3].split()[1])],
-                 [inConfigList[4].split()[0], int(inConfigList[4].split()[1])],
-                 [inConfigList[5].split()[0], int(inConfigList[5].split()[1])],
-                 [inConfigList[6].split()[0], int(inConfigList[6].split()[1])],
-                 [inConfigList[7].split()[0], int(inConfigList[7].split()[1])]
+    sheetInfo = [[inConfigList[3].split()[0], 0],
+                 [inConfigList[4].split()[0], 0],
+                 [inConfigList[5].split()[0], 0],
+                 [inConfigList[6].split()[0], 0],
+                 [inConfigList[7].split()[0], 0]
                  ]
     
     wb_original = openpyxl.load_workbook(originalFile)
@@ -294,11 +242,11 @@ def AppStart():
     workbookOutput = openpyxl.Workbook()
     ss_sheet = workbookOutput['Sheet']
     ss_sheet.title = 'Summary'
-    workbookOutput.create_sheet(sheetInfo[0][0], 2)
-    workbookOutput.create_sheet(sheetInfo[1][0], 3)
-    workbookOutput.create_sheet(sheetInfo[2][0], 4)
-    workbookOutput.create_sheet(sheetInfo[3][0], 5)
-    workbookOutput.create_sheet(sheetInfo[4][0], 6)
+    workbookOutput.create_sheet("1_"+sheetInfo[0][0], 2)
+    workbookOutput.create_sheet("2_"+sheetInfo[1][0], 3)
+    workbookOutput.create_sheet("3_"+sheetInfo[2][0], 4)
+    workbookOutput.create_sheet("4_"+sheetInfo[3][0], 5)
+    workbookOutput.create_sheet("5_"+sheetInfo[4][0], 6)
     
     workbookOutput.active = 0
     ws = workbookOutput.active
@@ -392,10 +340,22 @@ def AppStart():
         ws.column_dimensions['F'].width = 30.0
         ws.column_dimensions['G'].width = 8.0
         ws.column_dimensions['H'].width = 9.0
-        
-
-#-----------------------------------------------------#  
+#-----------------------------------------------------#
     ws_original = wb_original["TestPlan"]
+#-----------------------------------------------------#
+    readRowIdx = 1
+    for i in range(0,5):
+        while(True):
+            if(ws_original.cell(readRowIdx,1).value == None):
+                readRowIdx = readRowIdx+1   
+            elif(sheetInfo[i][0] in ws_original.cell(readRowIdx,1).value):
+                sheetInfo[i][1] = readRowIdx + 2
+                readRowIdx = readRowIdx+2
+                break
+            else:
+                readRowIdx = readRowIdx+1
+    
+#-----------------------------------------------------#  
     fontFail = Font(color='9c0006')
     fontInc = Font(color='006100')
     for i in range(0,5):
