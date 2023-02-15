@@ -143,9 +143,54 @@ def csv_to_excel(csv_filename, excel_filename):
     
     # Write to Excel file
     workbook = openpyxl.workbook.Workbook()
-    worksheet = workbook.active
+    ws = workbook.active
+    
+    lineCount = 1 
+    numCol = 0
+    sepSymbol = ""
+    writeRow = 1
+    keepReading = False
+    readStr = ""
     for row in csv_data:
-        worksheet.append(row)
+        if(lineCount == 1):
+            sepSymbol = row[0][4]   #Assume the string begins with "sep=" 
+        elif(lineCount == 2):
+            numCol = row[0].count(';') +1
+            #print(row[0],"\n")
+        else:
+            if(keepReading == False):
+                readStr = ""
+            
+            for i in range(0,len(row)):
+                readStr = readStr + row[i]
+            readStr = readStr.replace("; ",". ")
+
+            #if(writeRow >345 and writeRow <365):
+            #    print(writeRow, keepReading, readStr.count(';'))
+            #    print(readStr, "\n")
+                
+            if((keepReading == False) and (readStr.count(';') == 0)):
+                keepReading = False
+            elif((keepReading == False) and (readStr.count(';') +1 < numCol) ):
+                keepReading = True
+            elif((keepReading == True) and (readStr.count(';') +1 < numCol) ):
+                keepReading = True
+            else:
+                keepReading = False
+                readStr = readStr.split(";")
+                #print(readStr)
+                for c in range(0,len(readStr)):
+                    ws[chr(65+c)+str(writeRow)].value =  readStr[c]
+                writeRow = writeRow+1
+            #print(lineCount, readStr)
+
+            
+        lineCount = lineCount+1
+       
+        #print(row)
+        
+        
+        
     workbook.save(excel_filename)        
         
 def find_info_from_report(itemName,wb_harmony, wb_ebq):
@@ -163,7 +208,7 @@ def find_info_from_report(itemName,wb_harmony, wb_ebq):
         if(readRowIdx > 5000):
             break
 
-    ws_ebq = wb_ebq["Results"]
+    ws_ebq = wb_ebq["Sheet"]
     readRowIdx = 1
     while(True):
         readName = ws_ebq.cell(readRowIdx,1).value
@@ -213,10 +258,10 @@ def AppStart():
     wb_original = openpyxl.load_workbook(originalFile)
     wb_harmony = openpyxl.load_workbook(harmonyReport)
     
-    #csvfile_ebq = open(ebqReport)
-    #csv_to_excel(ebqReport, "Tmp.xlsx")
-    wb_ebq = openpyxl.load_workbook(ebqReport)
-    
+    # xlsx file,converted from CSV
+    csvfile_ebq = open(ebqReport)
+    csv_to_excel(ebqReport, "Tmp.xlsx")
+    wb_ebq = openpyxl.load_workbook("Tmp.xlsx")
     #print(inConfigList[0].split())
     #print(originalFile)
     #print(harmonyReport)
