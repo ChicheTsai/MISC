@@ -1,0 +1,3 @@
+py BQBReporter.py 0 TP_20230109-0925191345.xlsx
+py BQBReporter.py 1 TP_20230109-0925191345.xlsx TP_20230109-09251913451.xlsx 2022-2
+py BQBReporter.py 1 TP_20230109-0925191345.xlsx HarmonyReport.xlsx EbqReport.csv
