@@ -23,13 +23,15 @@ def AppStart():
     child = wexpect.spawn(cmd, timeout = TIMEOUT) 
     
     waitString("AAAA")
-    waitSecond(5)
+    waitSecond(1)
     writeString("1")
-    waitSecond(5)
+    waitSecond(2)
     waitString("BBBBB")
     writeString("2")
     waitString("CCCCC")
     writeString("1")
+    
+    child.close()
     
 if __name__ == '__main__':
     AppStart()
